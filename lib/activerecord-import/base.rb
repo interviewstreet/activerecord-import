@@ -4,6 +4,7 @@ require "active_record/version"
 
 module ActiveRecord::Import
   AdapterPath = File.join File.expand_path(File.dirname(__FILE__)), "/active_record/adapters"
+  AdapterAltPath1 = "active_record/connection_adapters"
 
   def self.base_adapter(adapter)
     case adapter
@@ -14,11 +15,15 @@ module ActiveRecord::Import
     else adapter
     end
   end
-  
+
   # Loads the import functionality for a specific database adapter
   def self.require_adapter(adapter)
     require File.join(AdapterPath,"/abstract_adapter")
-    require File.join(AdapterPath,"/#{base_adapter(adapter)}_adapter")
+    begin
+      require File.join(AdapterPath,"/#{base_adapter(adapter)}_adapter")
+    rescue LoadError
+      require File.join(AdapterAltPath1,"/#{base_adapter(adapter)}_adapter")
+    end
   end
 
   # Loads the import functionality for the passed in ActiveRecord connection
